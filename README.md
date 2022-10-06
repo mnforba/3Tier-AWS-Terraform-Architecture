@@ -399,9 +399,9 @@ In this tutorial, I will deploy a three-tier application in AWS using Terraform.
 
 So, now our entire code is ready. We need to run the below steps to create infrastructure.
 
-* terraform init is to initialize the working directory and downloading plugins of the provider
-* terraform plan is to create the execution plan for our code
-* terraform apply is to create the actual infrastructure. It will ask you to provide the Access Key and Secret Key in order to create the infrastructure. So, instead of hardcoding the Access Key and Secret Key, it is better to apply at the run time.
+* `terraform init` is to initialize the working directory and downloading plugins of the provider
+* `terraform plan` is to create the execution plan for our code
+* `terraform apply` is to create the actual infrastructure. It will ask you to provide the Access Key and Secret Key in order to create the infrastructure. So, instead of hardcoding the Access Key and Secret Key, it is better to apply at the run time.
 
 
 **Step 13:- Verify the resources**
@@ -420,6 +420,6 @@ So, now our entire code is ready. We need to run the below steps to create infra
 
 Once the resource creation finishes you can get the DNS of a load balancer and paste it into the browser and you can see load balancer will send the request to two instances.
 
-That’s it now, you have learned how to create various resources in AWS using Terraform.
+That’s it now, you can destroy the infrastructure using `terraform destroy`
 
  
