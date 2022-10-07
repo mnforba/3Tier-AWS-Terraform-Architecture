@@ -68,7 +68,7 @@ resource "aws_subnet" "application-subnet-1" {
   vpc_id                  = "${aws_vpc.demovpc.id}"
   cidr_block             = "${var.subnet2_cidr}"
   map_public_ip_on_launch = false
-  availability_zone = "us-east-1a"   
+  availability_zone = "us-east-1a"   #1a
 
   tags = {
     Name = "Application Subnet 1"
@@ -80,7 +80,7 @@ resource "aws_subnet" "application-subnet-2" {
   vpc_id                  = "${aws_vpc.demovpc.id}"
   cidr_block             = "${var.subnet3_cidr}"
   map_public_ip_on_launch = false
-  availability_zone = "us-east-1b"   
+  availability_zone = "us-east-1b"   #1b
 
   tags = {
     Name = "Application Subnet 2"
@@ -91,7 +91,7 @@ resource "aws_subnet" "application-subnet-2" {
 resource "aws_subnet" "database-subnet-1" {
   vpc_id            = "${aws_vpc.demovpc.id}"
   cidr_block        = "${var.subnet4_cidr}"
-  availability_zone = "us-east-1a"  
+  availability_zone = "us-east-1a"  #1a
 
   tags = {
     Name = "Database Subnet 1"
@@ -102,7 +102,7 @@ resource "aws_subnet" "database-subnet-1" {
 resource "aws_subnet" "database-subnet-2" {
   vpc_id            = "${aws_vpc.demovpc.id}"
   cidr_block        = "${var.subnet5_cidr}"
-  availability_zone = "us-east-1b"  
+  availability_zone = "us-east-1b"  #1a
 
   tags = {
     Name = "Database Subnet 1"
@@ -116,9 +116,9 @@ resource "aws_subnet" "database-subnet-2" {
 
   ```
   # Creating Internet Gateway 
-resource "aws_internet_gateway" "demogateway" {
-  vpc_id = "${aws_vpc.demovpc.id}"
-}
+  resource "aws_internet_gateway" "demogateway" {
+    vpc_id = "${aws_vpc.demovpc.id}"
+  }
   ```
 
 **Step 4:- Create a file for the Route table**
@@ -127,27 +127,26 @@ resource "aws_internet_gateway" "demogateway" {
 
   ```
   # Creating Route Table
-resource "aws_route_table" "route" {
+  resource "aws_route_table" "route" {
     vpc_id = "${aws_vpc.demovpc.id}"
-    route {
+  route {
         cidr_block = "0.0.0.0/0"
         gateway_id = "${aws_internet_gateway.demogateway.id}"
     }
-
-    tags = {
+  tags = {
         Name = "Route to internet"
     }
-}
-# Associating Route Table
-resource "aws_route_table_association" "rt1" {
-    subnet_id = "${aws_subnet.public-subnet-1.id}"
+  }
+  # Associating Route Table
+  resource "aws_route_table_association" "rt1" {
+    subnet_id = "${aws_subnet.demosubnet.id}"
     route_table_id = "${aws_route_table.route.id}"
-}
-# Associating Route Table
-resource "aws_route_table_association" "rt2" {
-    subnet_id = "${aws_subnet.public-subnet-2.id}"
+  }
+  # Associating Route Table
+  resource "aws_route_table_association" "rt2" {
+    subnet_id = "${aws_subnet.demosubnet1.id}"
     route_table_id = "${aws_route_table.route.id}"
-}
+  }
   ```
 * In the above code, I am creating a new route table and forwarding all the requests to the 0.0.0.0/0 CIDR block.
 * I am also attaching this route table to the subnet created earlier. So, it will work as the Public Subnet
@@ -157,53 +156,34 @@ resource "aws_route_table_association" "rt2" {
 * Create ec2.tf file and add the below code to it
 
   ```
-  
-#    Data source  
-data "aws_ami" "amazon_linux_2" {
-  most_recent = true
-  owners      = ["amazon"]
-
-  filter {
-    name   = "owner-alias"
-    values = ["amazon"]
-  }
-
-  filter {
-    name   = "name"
-    values = ["amzn2-ami-hvm*"]
-  }
-}
-# Creating 1st EC2 instance in Public Subnet
-resource "aws_instance" "demoinstance" {
-  ami                         = data.aws_ami.amazon_linux_2.id
-  instance_type               = "t2.micro"
-  #count                       = 1
-  key_name                    = "jenkins"
-  vpc_security_group_ids      = [aws_security_group.alb-security-group.id]
-  subnet_id                   = aws_subnet.public-subnet-1.id
-  associate_public_ip_address = true
-  user_data                   = "${file("data.sh")}"
-
+  # Creating 1st EC2 instance in Public Subnet
+  resource "aws_instance" "demoinstance" {
+    ami                         = "ami-087c17d1fe0178315"
+    instance_type               = "t2.micro"
+    count                       = 1
+    key_name                    = "tests"
+    vpc_security_group_ids      = ["${aws_security_group.demosg.id}"]
+    subnet_id                   = "${aws_subnet.demoinstance.id}"
+    associate_public_ip_address = true
+    user_data                   = "${file("data.sh")}"
   tags = {
     Name = "My Public Instance"
   }
-}
-
-# Creating 2nd EC2 instance in Public Subnet
-resource "aws_instance" "demoinstance1" {
-  ami                         = data.aws_ami.amazon_linux_2.id
-  instance_type               = "t2.micro"
-  #count                       = 1
-  key_name                    = "jenkins"
-  vpc_security_group_ids      = [aws_security_group.alb-security-group.id]
-  subnet_id                   = aws_subnet.public-subnet-2.id
-  associate_public_ip_address = true
-  user_data                   = "${file("data.sh")}"
-
+  }
+  # Creating 2nd EC2 instance in Public Subnet
+  resource "aws_instance" "demoinstance1" {
+    ami                         = "ami-087c17d1fe0178315"
+    instance_type               = "t2.micro"
+    count                       = 1
+    key_name                    = "tests"
+    vpc_security_group_ids      = ["${aws_security_group.demosg.id}"]
+    subnet_id                   = "${aws_subnet.demoinstance.id}"
+    associate_public_ip_address = true
+    user_data                   = "${file("data.sh")}"
   tags = {
     Name = "My Public Instance 2"
   }
-}
+  }
   ```
 
 * I have used the userdata to configure the EC2 instance, I will discuss data.sh file later in the article
@@ -214,39 +194,30 @@ resource "aws_instance" "demoinstance1" {
 
   ```
   # Creating Security Group 
-resource "aws_security_group" "alb-security-group" {
-  name         = "ALB Security Group"
-  description  = "Enable http/https and ssh access on port 80/443/22"
-  vpc_id       = "${aws_vpc.demovpc.id}"
-
+  resource "aws_security_group" "demosg" {
+    vpc_id = "${aws_vpc.demovpc.id}"
   # Inbound Rules
   # HTTP access from anywhere
   ingress {
-    description = "http acess"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
   # HTTPS access from anywhere
   ingress {
-    description = "https access"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
   # SSH access from anywhere
   ingress {
-    description = "ssh access"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
   # Outbound Rules
   # Internet access to anywhere
   egress {
@@ -255,11 +226,10 @@ resource "aws_security_group" "alb-security-group" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
   tags = {
-    Name = "ALB Security group"
+    Name = "Web SG"
   }
-}
+  }
   ```
 
 * I have opened 80,443 & 22 ports for the inbound connection and I have opened all the ports for the outbound connection
@@ -270,30 +240,27 @@ resource "aws_security_group" "alb-security-group" {
 
   ```
   # Create Database Security Group
-resource "aws_security_group" "database-sg" {
-  name        = "Database SG"
-  description = "Allow inbound traffic from application layer(MYSQL) on port 3306"
-  vpc_id      = aws_vpc.demovpc.id
-
+  resource "aws_security_group" "database-sg" {
+    name        = "Database SG"
+    description = "Allow inbound traffic from application layer"
+    vpc_id      = aws_vpc.demovpc.id
   ingress {
     description     = "Allow traffic from application layer"
     from_port       = 3306
     to_port         = 3306
     protocol        = "tcp"
-    security_groups = [aws_security_group.alb-security-group.id]
+    security_groups = [aws_security_group.demosg.id]
   }
-
   egress {
     from_port   = 32768
     to_port     = 65535
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
   tags = {
     Name = "Database SG"
   }
-}
+  }
   ```
 * I have opened 3306 ports for the inbound connection and I have opened all the ports for the outbound connection.
 
@@ -303,51 +270,44 @@ resource "aws_security_group" "database-sg" {
 
   ```
   # Creating External LoadBalancer
-resource "aws_lb" "external-alb" {
-  name               = "External-LB"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.alb-security-group.id]
-  subnets            = [aws_subnet.public-subnet-1.id, aws_subnet.public-subnet-2.id]
-}
-
-resource "aws_lb_target_group" "target-elb" {
-  name     = "ALB-TG"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = aws_vpc.demovpc.id
-}
-
-resource "aws_lb_target_group_attachment" "attachment" {
-  target_group_arn = aws_lb_target_group.target-elb.arn
-  target_id        = aws_instance.demoinstance.id
-  port             = 80
-
+  resource "aws_lb" "external-alb" {
+    name               = "External LB"
+    internal           = false
+    load_balancer_type = "application"
+    security_groups    = [aws_security_group.demosg.id]
+    subnets            = [aws_subnet.public-subnet-1.id, aws_subnet.public-subnet-1.id]
+  }
+  resource "aws_lb_target_group" "target-elb" {
+    name     = "ALB TG"
+    port     = 80
+    protocol = "HTTP"
+    vpc_id   = aws_vpc.demovpc.id
+  }
+  resource "aws_lb_target_group_attachment" "attachment" {
+    target_group_arn = aws_lb_target_group.external-alb.arn
+    target_id        = aws_instance.demoinstance.id
+    port             = 80
   depends_on = [
     aws_instance.demoinstance,
   ]
-}
-
-resource "aws_lb_target_group_attachment" "attachment1" {
-  target_group_arn = aws_lb_target_group.target-elb.arn
-  target_id        = aws_instance.demoinstance1.id
-  port             = 80
-
+  }
+  resource "aws_lb_target_group_attachment" "attachment" {
+    target_group_arn = aws_lb_target_group.external-alb.arn
+    target_id        = aws_instance.demoinstance1.id
+    port             = 80
   depends_on = [
     aws_instance.demoinstance1,
   ]
-}
-
-resource "aws_lb_listener" "external-elb" {
-  load_balancer_arn = aws_lb.external-alb.arn
-  port              = "80"
-  protocol          = "HTTP"
-
+  }
+  resource "aws_lb_listener" "external-elb" {
+    load_balancer_arn = aws_lb.external-alb.arn
+    port              = "80"
+    protocol          = "HTTP"
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.target-elb.arn
+    target_group_arn = aws_lb_target_group.external-alb.arn
   }
-}
+  }
   ```
 * The above load balancer is of type external
 * Load balancer type is set to application
@@ -360,28 +320,26 @@ resource "aws_lb_listener" "external-elb" {
 
   ```
   # Creating RDS Instance
-resource "aws_db_subnet_group" "database-subnet-group" {
-  name       = "database subnets"
-  subnet_ids = [aws_subnet.database-subnet-1.id, aws_subnet.database-subnet-2.id]
-
+  resource "aws_db_subnet_group" "default" {
+    name       = "main"
+    subnet_ids = [aws_subnet.database-subnet-1.id, aws_subnet.database-subnet-1.id]
   tags = {
     Name = "My DB subnet group"
   }
-}
-
-resource "aws_db_instance" "database-instance" {
-  allocated_storage      = 10
-  db_subnet_group_name   = aws_db_subnet_group.database-subnet-group.id
-  engine                 = "mysql"
-  engine_version         = "5.7"
-  instance_class         = "db.t2.micro"
-  multi_az               = true
-  name                   = "mydb"
-  username               = "username"
-  password               = "password"
-  skip_final_snapshot    = true
-  vpc_security_group_ids = [aws_security_group.database-sg.id]
-}
+  }
+  resource "aws_db_instance" "default" {
+    allocated_storage      = 10
+    db_subnet_group_name   = aws_db_subnet_group.default.id
+    engine                 = "mysql"
+    engine_version         = "5.7"
+    instance_class         = "db.t2.micro"
+    multi_az               = true
+    name                   = "mydb"
+    username               = "username"
+    password               = "password"
+    skip_final_snapshot    = true
+    vpc_security_group_ids = [aws_security_group.database-sg.id]
+  }
   ```
 * In the above code, you need to change the value of username & password
 * multi-az is set to true for the high availability
@@ -390,13 +348,12 @@ resource "aws_db_instance" "database-instance" {
 
 * Create outputs.tf file and add the below code to it
 
-
   ```
   # Getting the DNS of load balancer
   output "lb_dns_name" {
-  description = "The DNS name of the load balancer"
-  value       = aws_lb.external-alb.dns_name
-}
+    description = "The DNS name of the load balancer"
+    value       = "${aws_lb.external-alb.dns_name}"
+  }
   ```
   
 * From the above code, I will get the DNS of the application load balancer.
@@ -407,53 +364,33 @@ resource "aws_db_instance" "database-instance" {
 
   ```
   # Defining CIDR Block for VPC
-variable "vpc_cidr" {
-  default = "10.0.0.0/16"
-}
-# Defining CIDR Block for 1st Subnet
-variable "subnet_cidr" {
-  default = "10.0.1.0/24"
-}
-# Defining CIDR Block for 2nd Subnet
-variable "subnet1_cidr" {
-  default = "10.0.2.0/24"
-}
-# Defining CIDR Block for 3rd Subnet
-variable "subnet2_cidr" {
-  default = "10.0.3.0/24"
-}
-# Defining CIDR Block for 4th Subnet
-variable "subnet3_cidr" {
-  default = "10.0.4.0/24"
-}
-# Defining CIDR Block for 5th Subnet
-variable "subnet4_cidr" {
-  default = "10.0.5.0/24"
-}
-# Defining CIDR Block for 6th Subnet
-variable "subnet5_cidr" {
-  default = "10.0.6.0/24"
-}
-
-# App tier security group 
-variable "ssh-locate" {
-  default     = "yourip"
-  description = "ip address"
-  type        = string
-}
-# DB Instance    
-variable "database-instance-class" {
-  default     = "db.t2.micro"
-  description = "The Database Instance type"
-  type        = string
-}
-#     multi_AZ    
-####################
-variable "multi-az-deployment" {
-  default     = false
-  description = "Create a Standby DB Instance"
-  type        = bool
-}
+  variable "vpc_cidr" {
+    default = "10.0.0.0/16"
+  }
+  # Defining CIDR Block for 1st Subnet
+  variable "subnet_cidr" {
+    default = "10.0.1.0/24"
+  }
+  # Defining CIDR Block for 2nd Subnet
+  variable "subnet1_cidr" {
+    default = "10.0.2.0/24"
+  }
+  # Defining CIDR Block for 3rd Subnet
+  variable "subnet2_cidr" {
+    default = "10.0.3.0/24"
+  }
+  # Defining CIDR Block for 3rd Subnet
+  variable "subnet2_cidr" {
+    default = "10.0.4.0/24"
+  }
+  # Defining CIDR Block for 3rd Subnet
+  variable "subnet2_cidr" {
+    default = "10.0.5.0/24"
+  }
+  # Defining CIDR Block for 3rd Subnet
+  variable "subnet2_cidr" {
+    default = "10.0.6.0/24" 
+  }
   ```
 
 **Step 12:- Create a file for user data**
@@ -462,12 +399,11 @@ variable "multi-az-deployment" {
 
   ```
   #!/bin/bash
-
-yum update -y
-yum install -y httpd.x86_64
-systemctl start httpd.service
-systemctl enable httpd.service
-echo "Hello World from $(hostname -f)" > /var/www/html/index.html
+  yum update -y
+  yum install -y httpd.x86_64
+  systemctl start httpd.service
+  systemctl enable httpd.service
+  echo "Hello World from $(hostname -f)" > /var/www/html/index.html
   ```
   
 * The above code will install an apache webserver in the EC2 instances
