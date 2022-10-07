@@ -37,90 +37,13 @@ In this tutorial, I will deploy a three-tier application in AWS using Terraform.
 
 * Create route_table_public.tf file and code from the code base
 
-<<<<<<< HEAD
-=======
-  ```
-  # Creating Route Table
-  resource "aws_route_table" "route" {
-    vpc_id = "${aws_vpc.demovpc.id}"
-  route {
-        cidr_block = "0.0.0.0/0"
-        gateway_id = "${aws_internet_gateway.demogateway.id}"
-    }
-  tags = {
-        Name = "Route to internet"
-    }
-  }
-  # Associating Route Table
-  resource "aws_route_table_association" "rt1" {
-    subnet_id = "${aws_subnet.public-subnet-1.id}"
-    route_table_id = "${aws_route_table.route.id}"
-  }
-  # Associating Route Table
-  resource "aws_route_table_association" "rt2" {
-    subnet_id = "${aws_subnet.public-subnet-2.id}"
-    route_table_id = "${aws_route_table.route.id}"
-  }
-  ```
->>>>>>> 4e4a22a9f51b04a418f4a3dcd3ffe63f18bb73eb
 * In the above code, I am creating a new route table and forwarding all the requests to the 0.0.0.0/0 CIDR block.
 * I am also attaching this route table to the subnet created earlier. So, it will work as the Public Subnet
 
 **Step 5:- Create a file for EC2 instances**
 
-<<<<<<< HEAD
-* Create ec2.tf file and add code from the code base
-=======
 * Create ec2.tf file and add the below code to it
 
-  ```
- # Data source
- data "aws_ami" "amazon_linux_2" {
-  most_recent = true
-  owners      = ["amazon"]
-
-  filter {
-    name   = "owner-alias"
-    values = ["amazon"]
-   }
-
-  filter {
-    name   = "name"
-    values = ["amzn2-ami-hvm*"]
-    }
-    }
-  # Creating 1st EC2 instance in Public Subnet
-  resource "aws_instance" "demoinstance" {
-    ami                         = ata.aws_ami.amazon_linux_2.id
-    instance_type               = "t2.micro"
-    count                       = 1
-    key_name                    = "tests"
-    vpc_security_group_ids      = ["${aws_security_group.alb-security-group.id}"]
-    subnet_id                   = "${aws_subnet.public-subnet-1.id}"
-    associate_public_ip_address = true
-    user_data                   = "${file("data.sh")}"
-  tags = {
-    Name = "My Public Instance"
-  }
-  }
-  # Creating 2nd EC2 instance in Public Subnet
-  resource "aws_instance" "demoinstance1" {
-    ami                         = ata.aws_ami.amazon_linux_2.id
-    instance_type               = "t2.micro"
-    count                       = 1
-    key_name                    = "tests"
-    vpc_security_group_ids      = ["${aws_security_group.alb-security-group.id}"]
-    subnet_id                   = "${aws_subnet.public-subnet-2.id}"
-    associate_public_ip_address = true
-    user_data                   = "${file("data.sh")}"
-  tags = {
-    Name = "My Public Instance 2"
-  }
-  }
-  ```
->>>>>>> 4e4a22a9f51b04a418f4a3dcd3ffe63f18bb73eb
-
-* I have used the userdata to configure the EC2 instance, I will discuss data.sh file later in the article
 
 **Step 6:- Create a file for Security Group for the FrontEnd tier**
 
