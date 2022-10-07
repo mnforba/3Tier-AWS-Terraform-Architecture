@@ -128,12 +128,12 @@ In this tutorial, I will deploy a three-tier application in AWS using Terraform.
   }
   # Associating Route Table
   resource "aws_route_table_association" "rt1" {
-    subnet_id = "${aws_subnet.demosubnet.id}"
+    subnet_id = "${aws_subnet.public-subnet-1.id}"
     route_table_id = "${aws_route_table.route.id}"
   }
   # Associating Route Table
   resource "aws_route_table_association" "rt2" {
-    subnet_id = "${aws_subnet.demosubnet1.id}"
+    subnet_id = "${aws_subnet.public-subnet-2.id}"
     route_table_id = "${aws_route_table.route.id}"
   }
   ```
@@ -145,14 +145,29 @@ In this tutorial, I will deploy a three-tier application in AWS using Terraform.
 * Create ec2.tf file and add the below code to it
 
   ```
+ # Data source
+ data "aws_ami" "amazon_linux_2" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "owner-alias"
+    values = ["amazon"]
+   }
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm*"]
+    }
+    }
   # Creating 1st EC2 instance in Public Subnet
   resource "aws_instance" "demoinstance" {
-    ami                         = "ami-087c17d1fe0178315"
+    ami                         = ata.aws_ami.amazon_linux_2.id
     instance_type               = "t2.micro"
     count                       = 1
     key_name                    = "tests"
-    vpc_security_group_ids      = ["${aws_security_group.demosg.id}"]
-    subnet_id                   = "${aws_subnet.demoinstance.id}"
+    vpc_security_group_ids      = ["${aws_security_group.alb-security-group.id}"]
+    subnet_id                   = "${aws_subnet.public-subnet-1.id}"
     associate_public_ip_address = true
     user_data                   = "${file("data.sh")}"
   tags = {
@@ -161,12 +176,12 @@ In this tutorial, I will deploy a three-tier application in AWS using Terraform.
   }
   # Creating 2nd EC2 instance in Public Subnet
   resource "aws_instance" "demoinstance1" {
-    ami                         = "ami-087c17d1fe0178315"
+    ami                         = ata.aws_ami.amazon_linux_2.id
     instance_type               = "t2.micro"
     count                       = 1
     key_name                    = "tests"
-    vpc_security_group_ids      = ["${aws_security_group.demosg.id}"]
-    subnet_id                   = "${aws_subnet.demoinstance.id}"
+    vpc_security_group_ids      = ["${aws_security_group.alb-security-group.id}"]
+    subnet_id                   = "${aws_subnet.public-subnet-2.id}"
     associate_public_ip_address = true
     user_data                   = "${file("data.sh")}"
   tags = {
