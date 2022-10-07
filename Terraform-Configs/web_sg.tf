@@ -1,10 +1,13 @@
 # Creating Security Group 
-resource "aws_security_group" "demosg" {
-  vpc_id = "${aws_vpc.demovpc.id}"
+resource "aws_security_group" "alb-security-group" {
+  name         = "ALB Security Group"
+  description  = "Enable http/https and ssh access on port 80/443/22"
+  vpc_id       = "${aws_vpc.demovpc.id}"
 
   # Inbound Rules
   # HTTP access from anywhere
   ingress {
+    description = "http acess"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
@@ -13,6 +16,7 @@ resource "aws_security_group" "demosg" {
 
   # HTTPS access from anywhere
   ingress {
+    description = "https access"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
@@ -21,6 +25,7 @@ resource "aws_security_group" "demosg" {
 
   # SSH access from anywhere
   ingress {
+    description = "ssh access"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
@@ -37,6 +42,6 @@ resource "aws_security_group" "demosg" {
   }
 
   tags = {
-    Name = "Web SG"
+    Name = "ALB Security group"
   }
 }

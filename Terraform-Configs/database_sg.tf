@@ -1,7 +1,7 @@
 # Create Database Security Group
 resource "aws_security_group" "database-sg" {
   name        = "Database SG"
-  description = "Allow inbound traffic from application layer"
+  description = "Allow inbound traffic from application layer(MYSQL) on port 3306"
   vpc_id      = aws_vpc.demovpc.id
 
   ingress {
@@ -9,7 +9,7 @@ resource "aws_security_group" "database-sg" {
     from_port       = 3306
     to_port         = 3306
     protocol        = "tcp"
-    security_groups = [aws_security_group.demosg.id]
+    security_groups = [aws_security_group.alb-security-group.id]
   }
 
   egress {

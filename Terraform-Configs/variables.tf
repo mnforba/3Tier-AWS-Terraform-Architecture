@@ -26,3 +26,27 @@ variable "subnet4_cidr" {
 variable "subnet5_cidr" {
   default = "10.0.6.0/24"
 }
+############################
+## App tier security group ##
+############################
+variable "ssh-locate" {
+  default     = "yourip"
+  description = "ip address"
+  type        = string
+}
+####################
+## DB Instance    ##
+####################
+variable "database-instance-class" {
+  default     = "db.t2.micro"
+  description = "The Database Instance type"
+  type        = string
+}
+####################
+##     multi_AZ    #
+####################
+variable "multi-az-deployment" {
+  default     = false
+  description = "Create a Standby DB Instance"
+  type        = bool
+}
