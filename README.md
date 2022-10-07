@@ -40,74 +40,63 @@ In this tutorial, I will deploy a three-tier application in AWS using Terraform.
 
   ```
   # Creating 1st web subnet 
-resource "aws_subnet" "public-subnet-1" {
-  vpc_id                  = "${aws_vpc.demovpc.id}"
-  cidr_block             = "${var.subnet_cidr}"
-  map_public_ip_on_launch = true
-  availability_zone = "us-east-1a"   #1a
-
+  resource "aws_subnet" "public-subnet-1" {
+    vpc_id                  = "${aws_vpc.demovpc.id}"
+    cidr_block             = "${var.subnet_cidr}"
+    map_public_ip_on_launch = true
+    availability_zone = "us-east-1a"
   tags = {
     Name = "Web Subnet 1"
   }
-}
-
-# Creating 2nd web subnet 
-resource "aws_subnet" "public-subnet-2" {
-  vpc_id                  = "${aws_vpc.demovpc.id}"
-  cidr_block             = "${var.subnet1_cidr}"
-  map_public_ip_on_launch = true
-  availability_zone = "us-east-1b"   #1b
-
+  }
+  # Creating 2nd web subnet 
+  resource "aws_subnet" "public-subnet-2" {
+    vpc_id                  = "${aws_vpc.demovpc.id}"
+    cidr_block             = "${var.subnet1_cidr}"
+    map_public_ip_on_launch = true
+    availability_zone = "us-east-1b"
   tags = {
     Name = "Web Subnet 2"
   }
-}
-
-# Creating 1st application subnet 
-resource "aws_subnet" "application-subnet-1" {
-  vpc_id                  = "${aws_vpc.demovpc.id}"
-  cidr_block             = "${var.subnet2_cidr}"
-  map_public_ip_on_launch = false
-  availability_zone = "us-east-1a"   #1a
-
+  }
+  # Creating 1st application subnet 
+  resource "aws_subnet" "application-subnet-1" {
+    vpc_id                  = "${aws_vpc.demovpc.id}"
+    cidr_block             = "${var.subnet2_cidr}"
+    map_public_ip_on_launch = false
+    availability_zone = "us-east-1a"
   tags = {
     Name = "Application Subnet 1"
   }
-}
-
-# Creating 2nd application subnet 
-resource "aws_subnet" "application-subnet-2" {
-  vpc_id                  = "${aws_vpc.demovpc.id}"
-  cidr_block             = "${var.subnet3_cidr}"
-  map_public_ip_on_launch = false
-  availability_zone = "us-east-1b"   #1b
-
+  }
+  # Creating 2nd application subnet 
+  resource "aws_subnet" "application-subnet-2" {
+    vpc_id                  = "${aws_vpc.demovpc.id}"
+    cidr_block             = "${var.subnet3_cidr}"
+    map_public_ip_on_launch = false
+    availability_zone = "us-east-1b"
   tags = {
     Name = "Application Subnet 2"
   }
-}
-
-# Create Database Private Subnet
-resource "aws_subnet" "database-subnet-1" {
-  vpc_id            = "${aws_vpc.demovpc.id}"
-  cidr_block        = "${var.subnet4_cidr}"
-  availability_zone = "us-east-1a"  #1a
-
+  }
+  # Create Database Private Subnet
+  resource "aws_subnet" "database-subnet-1" {
+    vpc_id            = "${aws_vpc.demovpc.id}"
+    cidr_block        = "${var.subnet4_cidr}"
+    availability_zone = "us-east-1a"
   tags = {
     Name = "Database Subnet 1"
   }
-}
-
-# Create Database Private Subnet
-resource "aws_subnet" "database-subnet-2" {
-  vpc_id            = "${aws_vpc.demovpc.id}"
-  cidr_block        = "${var.subnet5_cidr}"
-  availability_zone = "us-east-1b"  #1a
-
+  }
+  # Create Database Private Subnet
+  resource "aws_subnet" "database-subnet-2" {
+    vpc_id            = "${aws_vpc.demovpc.id}"
+    cidr_block        = "${var.subnet5_cidr}"
+    availability_zone = "us-east-1a"
   tags = {
     Name = "Database Subnet 1"
   }
-}
+  }
   ```
   
 **Step 3:- Create a file for the Internet Gateway**
@@ -331,7 +320,7 @@ resource "aws_subnet" "database-subnet-2" {
     allocated_storage      = 10
     db_subnet_group_name   = aws_db_subnet_group.default.id
     engine                 = "mysql"
-    engine_version         = "5.7"
+    engine_version         = "8.0.20"
     instance_class         = "db.t2.micro"
     multi_az               = true
     name                   = "mydb"
@@ -409,6 +398,31 @@ resource "aws_subnet" "database-subnet-2" {
 * The above code will install an apache webserver in the EC2 instances
 
 So, now our entire code is ready. We need to run the below steps to create infrastructure.
+
+* terraform init is to initialize the working directory and downloading plugins of the provider
+* terraform plan is to create the execution plan for our code
+* terraform apply is to create the actual infrastructure. It will ask you to provide the Access Key and Secret Key in order to create the infrastructure. So, instead of hardcoding the Access Key and Secret Key, it is better to apply at the run time.
+
+
+**Step 13:- Verify the resources**
+
+* Terraform will create below resources
+
+  * VPC
+  * Application Load Balancer
+  * Public & Private Subnets
+  * EC2 instances
+  * RDS instance
+  * Route Table
+  * Internet Gateway
+  * Security Groups for Web & RDS instances
+  * Route Table
+
+Once the resource creation finishes you can get the DNS of a load balancer and paste it into the browser and you can see load balancer will send the request to two instances.
+
+That’s it now, you have learned how to create various resources in AWS using Terraform.
+
+ So, now our entire code is ready. We need to run the below steps to create infrastructure.
 
 * `terraform init` is to initialize the working directory and downloading plugins of the provider
 * `terraform plan` is to create the execution plan for our code
