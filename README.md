@@ -27,22 +27,22 @@ In this tutorial, I will deploy a three-tier application in AWS using Terraform.
 **Step 2:- Create a file for the Subnet**
 
 * For this project, I will create total 6 subnets for the front-end tier and back-end tier with a mixture of public & private subnet
-* Create subnet.tf file and code from the code base
+* Create `subnet.tf` file and code from the code base
   
 **Step 3:- Create a file for the Internet Gateway**
 
-* Create igw.tf file and code from the code base
+* Create `igw.tf` file and code from the code base
 
 **Step 4:- Create a file for the Route table**
 
-* Create route_table_public.tf file and code from the code base
+* Create `route_table_public.tf` file and code from the code base
 
 * In the above code, I am creating a new route table and forwarding all the requests to the 0.0.0.0/0 CIDR block.
 * I am also attaching this route table to the subnet created earlier. So, it will work as the Public Subnet
 
 **Step 5:- Create a file for EC2 instances**
 
-* Create ec2.tf file and add the below code to it
+* Create `ec2.tf` file and add the below code to it
 
 
 **Step 6:- Create a file for Security Group for the FrontEnd tier**
@@ -55,31 +55,31 @@ In this tutorial, I will deploy a three-tier application in AWS using Terraform.
 
 **Step 8:- Create a file Application Load Balancer**
 
-* Create alb.tf file and code from the code base
+* Create `alb.tf` file and code from the code base
 * The above load balancer is of type external
 * Load balancer type is set to application
-* The aws_lb_target_group_attachment resource will attach our instances to the Target Group.
+* The `aws_lb_target_group_attachment` resource will attach our instances to the Target Group.
 * The load balancer will listen requests on port 80
 
 **Step 9:- Create a file for the RDS instance**
 
-* Create a rds.tf file and code from the code base
+* Create a `rds.tf` file and code from the code base
 * In the above code, you need to change the value of username & password
 * multi-az is set to true for the high availability
 
 **Step 10:- Create a file for outputs**
 
-* Create outputs.tf file and code from the code base
+* Create `outputs.tf` file and code from the code base
   
 * From the above code, I will get the DNS of the application load balancer.
 
 **Step 11:- Create a file for variable**
 
-* Create vars.tf file and code from the code base
+* Create `vars.tf` file and code from the code base
 
 **Step 12:- Create a file for user data**
 
-* Create data.sh file and code from the code base
+* Create `data.sh` file and code from the code base
  
 * The above code will install an apache webserver in the EC2 instances
 
